@@ -1,11 +1,25 @@
 body {
     text-align: center;
+    background-color: black;
+    color: white;
 }
 
 canvas {
-    border: 3px solid red;
+    background-color: lightgrey;
+    border: 5px solid darkgray;
 }
 
 #restart { 
     display: none;
 }
+
+button {
+    background-color: #555555; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+  }

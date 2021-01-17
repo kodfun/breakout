@@ -19,6 +19,7 @@ function initializeGame() {
         h: canvas.width / 20, // height (yükseklik)
         vx: random(-400, 400), // velocity (hız: pixel/seconds) x
         vy: -400, // velocity (hız: pixes/seconds) y
+        color: "navy",
         xCenter: function () {
             return this.x + this.w / 2;
         },
@@ -99,7 +100,7 @@ function drawBrick(brick) {
 
 function drawBall() {
     var r = ball.w / 2;
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = ball.color;
     ctx.beginPath();
     ctx.arc(ball.x + r, ball.y + r, r, 0, 2 * Math.PI);
     ctx.fill();
