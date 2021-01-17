@@ -1,43 +1,55 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var ball = {
-    x: canvas.width / 2,
-    y: canvas.height,
-    w: canvas.width / 20, // width (genişlik)
-    h: canvas.width / 20, // height (yükseklik)
-    vx: -80, // velocity (hız: pixel/seconds) x
-    vy: -400, // velocity (hız: pixes/seconds) y
-    xCenter: function () {
-        return this.x + this.w / 2;
-    },
-    xRight: function () {
-        return this.x + this.w;
-    },
-    yBottom: function () {
-        return this.y + this.h;
-    }
-};
-var paddle = {
-    x: canvas.width / 2 - (canvas.width / 5) / 2,
-    y: canvas.height * .9 - canvas.width / 20,
-    w: canvas.width / 4, // width (genişlik)
-    h: canvas.width / 20, // height (yükseklik)
-    vx: 0, // velocity (hız) x
-    vy: 0, // velocity (hız) y,
-    xRight: function () {
-        return this.x + this.w;
-    },
-    yBottom: function () {
-        return this.y + this.h;
-    }
-};
-var bricks = [];
-var brickColumnsNum = 6;
-var brickRowsNum = 5;
+var brickColumnsNum = 4;
+var brickRowsNum = 4;
+var btnPlay = document.getElementById("play");
+var btnRestart = document.getElementById("restart");
 
-
+var ball;
+var paddle;
+var bricks;
+var isGameOver;
 
 // FUNCTIONS
+function initializeGame() {
+    ball = {
+        x: canvas.width / 2,
+        y: canvas.height,
+        w: canvas.width / 20, // width (genişlik)
+        h: canvas.width / 20, // height (yükseklik)
+        vx: random(-400, 400), // velocity (hız: pixel/seconds) x
+        vy: -400, // velocity (hız: pixes/seconds) y
+        xCenter: function () {
+            return this.x + this.w / 2;
+        },
+        xRight: function () {
+            return this.x + this.w;
+        },
+        yBottom: function () {
+            return this.y + this.h;
+        }
+    };
+    paddle = {
+        x: canvas.width / 2 - (canvas.width / 5) / 2,
+        y: canvas.height * .9 - canvas.width / 20,
+        w: canvas.width / 4, // width (genişlik)
+        h: canvas.width / 20, // height (yükseklik)
+        vx: 0, // velocity (hız) x
+        vy: 0, // velocity (hız) y,
+        xRight: function () {
+            return this.x + this.w;
+        },
+        yBottom: function () {
+            return this.y + this.h;
+        }
+    };
+    bricks = [];
+    isGameOver = false;
+    loadBricks();
+    drawBricks();
+    drawBall();
+}
+
 function loadBricks() {
     var marginTop = canvas.height / 10;
     var marginX = canvas.width / 12;
@@ -46,10 +58,10 @@ function loadBricks() {
     var brick;
     for (var row = 0; row < brickRowsNum; row++) {
         for (var col = 0; col < brickColumnsNum; col++) {
-            brick = createBrick(col * brickWidth + marginX, 
-                row * brickHeight + marginTop, 
+            brick = createBrick(col * brickWidth + marginX,
+                row * brickHeight + marginTop,
                 brickWidth, brickHeight);
-                bricks.push(brick);
+            bricks.push(brick);
         }
     }
 
@@ -152,13 +164,13 @@ function checkPaddleCollision() {
 
         // paddle'in neresine çarptı
         var ratio = (ball.x - paddle.x) / paddle.w;
-        
+
         if (ratio < 1 / 5) {
             ball.vx = ball.vy;
         } else if (ratio < 2 / 5) {
             ball.vx = ball.vy / 2;
         } else if (ratio < 3 / 5) {
-            
+
         } else if (ratio < 4 / 5) {
             ball.vx = -ball.vy / 2;
         } else {
@@ -169,7 +181,7 @@ function checkPaddleCollision() {
 
 function checkBrickCollision() {
     var overflowX, overflowY;
-    
+
     for (var i = 0; i < bricks.length; i++) {
         var brick = bricks[i];
 
@@ -201,10 +213,19 @@ function checkBrickCollision() {
             }
 
             bricks.splice(i, 1);
+            if (bricks.length == 0) {
+                isGameOver = true;
+            }
             return;
         }
     }
 
+}
+
+function checkBallEscape() {
+    if (ball.y > canvas.height) {
+        isGameOver = true;
+    }
 }
 
 function isColliding(brick) {
@@ -222,18 +243,27 @@ function clean() {
 var oldTimeStamp = 0;
 var frameCounter = 0;
 function gameLoop(timeStamp) {
-    var timePassedMs = timeStamp - oldTimeStamp;
-    var timePassedSec = timePassedMs / 1000;
+    var timePassedMs = timeStamp - oldTimeStamp
+    var timePassedSec = Math.min(timePassedMs / 1000, 0.1);
     oldTimeStamp = timeStamp;
     frameCounter++;
     update(timePassedSec);
     checkWallCollision(); // duvara çarpma kontrol
     checkPaddleCollision(); // top paddle'e çarptı mı?
     checkBrickCollision(); // top tuğlaya çarptı mı?
+    checkBallEscape(); // top kaçtı mı?
     clean();
     drawBricks();
     drawPaddle();
     drawBall();
+
+    if (isGameOver) {
+        setTimeout(function () {
+            alert("GAME OVER!");
+            btnRestart.style.display = "inline";
+        }, 100);
+        return;
+    }
 
     if (frameCounter < 6000)
         window.requestAnimationFrame(gameLoop);
@@ -241,6 +271,12 @@ function gameLoop(timeStamp) {
 
 function clone(obj) {
     return Object.assign({}, obj);
+}
+
+// [min, max] inclusive
+function random(min, max) {
+    var num = max - min + 1;
+    return Math.floor(min + Math.random() * num);
 }
 
 // EVENTS
@@ -259,9 +295,16 @@ document.body.onkeyup = function (event) {
         paddle.vx = 0;
     }
 };
+btnPlay.onclick = function (event) {
+    this.style.display = "none";
+    window.requestAnimationFrame(gameLoop);
+};
+btnRestart.onclick = function (event) {
+    this.style.display = "none";
+    initializeGame();
+    window.requestAnimationFrame(gameLoop);
+};
 
 
-loadBricks();
-drawBricks();
-drawBall();
-window.requestAnimationFrame(gameLoop);
+initializeGame();
+

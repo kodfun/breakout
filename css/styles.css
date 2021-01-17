@@ -1,3 +1,11 @@
+body {
+    text-align: center;
+}
+
 canvas {
     border: 3px solid red;
+}
+
+#restart { 
+    display: none;
 }
