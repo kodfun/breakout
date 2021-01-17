@@ -20,7 +20,7 @@ var ball = {
 var paddle = {
     x: canvas.width / 2 - (canvas.width / 5) / 2,
     y: canvas.height * .9 - canvas.width / 20,
-    w: canvas.width / 5, // width (genişlik)
+    w: canvas.width / 4, // width (genişlik)
     h: canvas.width / 20, // height (yükseklik)
     vx: 0, // velocity (hız) x
     vy: 0, // velocity (hız) y,
@@ -149,6 +149,21 @@ function checkPaddleCollision() {
         overflowY = ball.yBottom() - paddle.y;
         ball.y = paddle.y - overflowY - ball.h;
         ball.vy *= -1;
+
+        // paddle'in neresine çarptı
+        var ratio = (ball.x - paddle.x) / paddle.w;
+        
+        if (ratio < 1 / 5) {
+            ball.vx = ball.vy;
+        } else if (ratio < 2 / 5) {
+            ball.vx = ball.vy / 2;
+        } else if (ratio < 3 / 5) {
+            
+        } else if (ratio < 4 / 5) {
+            ball.vx = -ball.vy / 2;
+        } else {
+            ball.vx = -ball.vy;
+        }
     }
 }
 
@@ -230,7 +245,6 @@ function clone(obj) {
 
 // EVENTS
 document.body.onkeydown = function (event) {
-    console.log(event);
     // klayveden sol oka basıldığında
     if (event.keyCode == 37) {
         paddle.vx = -300;
