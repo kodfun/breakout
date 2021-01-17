@@ -265,8 +265,7 @@ function gameLoop(timeStamp) {
         return;
     }
 
-    if (frameCounter < 6000)
-        window.requestAnimationFrame(gameLoop);
+    window.requestAnimationFrame(gameLoop);
 }
 
 function clone(obj) {
